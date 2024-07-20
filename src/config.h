@@ -9,12 +9,12 @@
 #define wifi_pass "aingmaung"
 
 // HTTP global variable
-extern HttpClient http;
-#define http_server ""
+extern HTTPClient http;
+#define http_post_server "http://192.168.161.107:5000/esp32/post_images"
 
 // Ultrasonic app
-#define trigPin                       5
-#define echoPin                       18
+#define trigPin                       12
+#define echoPin                       14
 #define soundSpeed                    0.034            // Sound speed in cm/μs
 #define range_minimum_camera_active   80               // Minimum distance in cm for camera being ON 
 

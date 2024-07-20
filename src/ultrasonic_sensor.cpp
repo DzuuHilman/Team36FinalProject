@@ -1,6 +1,5 @@
 #include "config.h"
 #include "app.h"
-#include <Arduino.h>
 
 //define sound speed in cm/uS
 

@@ -1,5 +1,4 @@
 #include "app.h"
-#include "esp_camera.h"
 #include "config.h"
 
 int distance;
@@ -71,13 +70,12 @@ void loop() {
   // Check if object is present in minimum range
   distance = ultrasonic_get_distance();
   if (distance < range_minimum_camera_active) {
-    camera_fb_t *fb = esp_camera_fb_get();
+    camera_fb_t* fb = esp_camera_fb_get();
     if (fb) {
-      
-      return;
+      sendImageToServer(http_post_server, fb);
+      esp_camera_fb_return(fb);
     }
-
-    else {
+  } else {
     Serial.println("No object detected");
   }
 
