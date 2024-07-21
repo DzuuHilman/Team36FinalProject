@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import os
 import time
 from gtts import gTTS
@@ -7,14 +7,14 @@ from ultralytics import YOLO
 
 app = Flask(__name__)
 
-frames_folder = 'Team36FinalProject/frames'
+frames_folder = 'frames'
 os.makedirs(frames_folder, exist_ok=True)
 
-tts_foldes = 'Team36FinalProject/tts'
-os.makedirs(tts_foldes, exist_ok=True)
+tts_folders = 'tts'
+os.makedirs(tts_folders, exist_ok=True)
 
 model = YOLO('yolov8s.pt')
-
+labels = []
 @app.route('/')
 def landing_page():
     return "This is landing page"
@@ -39,26 +39,30 @@ def upload_file():
         f.write(image_data)
         
     # Perform object detection
-    result = model(filepath)
+    result = model(filepath)[0]
     detections = sv.Detections.from_ultralytics(result)
     detections = detections[detections.confidence > 0.5]
+    global labels
     labels = [
-        f"{result.names[class_id]}: {confidence:.2f}"
+        f"{result.names[class_id]}"
         for class_id, confidence in zip(detections.class_id, detections.confidence)
     ]
+
     print(labels)
     if len(labels) == 0:
         return jsonify({'message': 'No objects detected'}), 200
     else:
         return jsonify({'message': 'Objects detected', 'labels': labels}), 200 
-       
+
     # return jsonify({'message': 'File uploaded successfully'}), 200
 
 
 @app.route('/esp32/get_images', methods=['GET'])
 def get_files():
     files = os.listdir(frames_folder)
-    return jsonify({'files': files}), 200
+    global labels
+    print(labels)
+    return jsonify({'files': files, 'labels': labels}), 200
 
 
 @app.route('/esp32/delete_images', methods=['DELETE'])
@@ -72,23 +76,22 @@ def delete_files():
     return jsonify({'message': 'Files deleted successfully'}), 200
 
 
-@app.route('/esp32/post_and_get_tts_voice', methods=['POST'])
+@app.route('/esp32/post_and_get_tts_voice', methods=['GET'])
 def post_and_get_tts_voice():
-    # Check if the content type is text/plain
-    if request.content_type != 'text/plain':
-        return jsonify({'error': 'Invalid content type. Expected text/plain'}), 400
+    global labels
+    if not labels:
+        return jsonify({'error': 'No object detected'}), 200
 
-    # Get the text data from the request
-    object_name = request.form.get('object_name')
-
-    if not object_name:
-        return jsonify({'error': 'No text data received'}), 400
+    object_name = labels[0]
 
     voiceCall = "Careful! There is a " + object_name + "in front of you!"
     tts = gTTS(text=voiceCall, lang='en')
 
-    tts.save
-    return jsonify({'message': 'Text received and TTS voice generated'}), 200
+    filename = 'tts.mp3'  # You can generate a unique name if needed
+    filepath = os.path.join(tts_folders, filename)
+    
+    tts.save(filepath)
+    return send_file('tts/tts.mp3', mimetype='audio/mpeg'), 200
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
