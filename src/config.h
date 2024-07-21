@@ -12,6 +12,7 @@
 // HTTP global variable
 extern HTTPClient http;
 #define http_post_server "http://192.168.161.107:5000/esp32/post_images"
+#define http_get_tts "http://192.168.161.107:5000/esp32/post_and_get_tts_voice"
 
 // Ultrasonic app
 #define trigPin                       12
