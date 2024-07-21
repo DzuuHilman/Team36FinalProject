@@ -3,6 +3,7 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <driver/dac.h>
 
 // WiFi credential
 #define wifi_ssid "Hey hey"                         // Change to current actived WiFi
@@ -38,4 +39,6 @@ extern HTTPClient http;
 #define HREF_GPIO_NUM  23
 #define PCLK_GPIO_NUM  22
 
+// Speaker app...
+#define delay_sample 60         // 
 #endif
