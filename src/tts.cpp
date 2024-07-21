@@ -13,7 +13,7 @@ void playMp3File(uint8_t *buffPlay, int len) {
     for (int i = 0; i < len; i += sizeof(data16)) {
         memcpy(&data16, (char*)buffPlay + i, sizeof(data16));
         left = ((uint16_t)data16 + 32767) >> 8;
-        dac_output_voltage(DAC_CHANNEL_1, left);
+        dac_output_voltage(DAC_CHAN_0, left);
         delayMicroseconds(delayus);
     }
     
@@ -65,6 +65,6 @@ void fetchAndPlayAudio() {
     http.end();
   }
 
-  dac_output_voltage(DAC_CHANNEL_1, 0);
+  dac_output_voltage(DAC_CHAN_0, 0);
 
 }

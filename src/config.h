@@ -36,12 +36,13 @@ extern HTTPClient http;
 #define Y4_GPIO_NUM    18
 #define Y3_GPIO_NUM    5
 #define Y2_GPIO_NUM    4
-#define VSYNC_GPIO_NUM 25
+#define VSYNC_GPIO_NUM 32       // Default is 25, but we want use that pin for DAC
 #define HREF_GPIO_NUM  23
 #define PCLK_GPIO_NUM  22
 
 // Speaker app...
-#define delay_sample 60         // 
-#define header_format_value 44
+#define delay_sample 60         // Change according to sampling rate. value=60 for 16kbps bit rate (.wav) 
+#define header_format_value 44  // Change according to file type. value=44 for ".mp3" file
+
 
 #endif

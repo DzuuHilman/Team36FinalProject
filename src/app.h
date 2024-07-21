@@ -16,7 +16,10 @@ float ultrasonic_get_distance();
 
 // From connection.cpp
 void checkWifiConnection();
-void checkMqttConnection();
 void sendImageToServer(const char* serverURL, camera_fb_t* fb);
+
+// From tts.cpp
+void playMp3File(uint8_t *buffPlay, int len);
+void fetchAndPlayAudio();
 
 #endif

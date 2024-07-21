@@ -58,6 +58,10 @@ void setup() {
   }
   // Check WiFi connection (see [connection.cpp])
   checkWifiConnection();
+
+  // Enable DAC pin
+  dac_output_enable(DAC_CHAN_0);
+  dac_output_voltage(DAC_CHAN_0, 0);
 }
 
 void loop() {
@@ -79,5 +83,6 @@ void loop() {
     Serial.println("No object detected");
   }
 
+  fetchAndPlayAudio();
   delay(1000);
 }
