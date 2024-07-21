@@ -42,4 +42,6 @@ extern HTTPClient http;
 
 // Speaker app...
 #define delay_sample 60         // 
+#define header_format_value 44
+
 #endif
