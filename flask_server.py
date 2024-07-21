@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 import os
 import time
 from gtts import gTTS
+import supervision as sv
+from ultralytics import YOLO
 
 app = Flask(__name__)
 
@@ -11,6 +13,7 @@ os.makedirs(frames_folder, exist_ok=True)
 tts_foldes = 'Team36FinalProject/tts'
 os.makedirs(tts_foldes, exist_ok=True)
 
+model = YOLO('yolov8s.pt')
 
 @app.route('/')
 def landing_page():
@@ -34,7 +37,22 @@ def upload_file():
     filepath = os.path.join(frames_folder, filename)
     with open(filepath, 'wb') as f:
         f.write(image_data)
-    return jsonify({'message': 'File uploaded successfully'}), 200
+        
+    # Perform object detection
+    result = model(filepath)
+    detections = sv.Detections.from_ultralytics(result)
+    detections = detections[detections.confidence > 0.5]
+    labels = [
+        f"{result.names[class_id]}: {confidence:.2f}"
+        for class_id, confidence in zip(detections.class_id, detections.confidence)
+    ]
+    print(labels)
+    if len(labels) == 0:
+        return jsonify({'message': 'No objects detected'}), 200
+    else:
+        return jsonify({'message': 'Objects detected', 'labels': labels}), 200 
+       
+    # return jsonify({'message': 'File uploaded successfully'}), 200
 
 
 @app.route('/esp32/get_images', methods=['GET'])
