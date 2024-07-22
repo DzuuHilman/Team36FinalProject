@@ -2,6 +2,7 @@
 #include "config.h"
 
 int distance;
+char bt_name;
 
 void setup() {
   Serial.begin(115200);
@@ -56,8 +57,10 @@ void setup() {
     Serial.println("Camera init failed");
     return;
   }
-  // Check WiFi connection (see [connection.cpp])
+  // Check WiFi and Bluetooth connection (see [connection.cpp])
   checkWifiConnection();
+  bt_name = getBluetoothName();
+  checkBluetoothConnection(bt_name);
 }
 
 void loop() {
@@ -71,13 +74,27 @@ void loop() {
   distance = ultrasonic_get_distance();
   if (distance < range_minimum_camera_active) {
     camera_fb_t* fb = esp_camera_fb_get();
-    if (fb) {
+    
+    if (!fb) {
+      Serial.println("Camera capture failed");
+      return;
+    } else{
       sendImageToServer(http_post_server, fb);
       esp_camera_fb_return(fb);
     }
+    
   } else {
     Serial.println("No object detected");
   }
 
-  delay(1000);
+  // Check bluetooth is on
+  if (!SerialBT.connect()) {
+    Serial.println("Bluetooth disconnected, reconnecting...");
+    checkBluetoothConnection(bt_name);
+  }
+  
+  // Get .mp3 file from HTTP and send it to Bluetooth connection
+  fetchAndPlayAudio();
+
+  delay(500);
 }

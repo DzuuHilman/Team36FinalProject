@@ -1,7 +1,9 @@
-#include "esp32-hal.h"
+// #include "esp32-hal.h"
 #include "app.h"
 #include "config.h"
-
+// #include <driver/dac.h>
+// #include <stdint.h>
+// #include "HardwareSerial.h"
 
 uint16_t data16;
 uint8_t left;
@@ -13,7 +15,9 @@ void playMp3File(uint8_t *buffPlay, int len) {
     for (int i = 0; i < len; i += sizeof(data16)) {
         memcpy(&data16, (char*)buffPlay + i, sizeof(data16));
         left = ((uint16_t)data16 + 32767) >> 8;
-        dac_output_voltage(DAC_CHANNEL_1, left);
+        
+        // Send data over Bluetooth Serial
+        SerialBT.write(left);
         delayMicroseconds(delayus);
     }
     
@@ -21,6 +25,7 @@ void playMp3File(uint8_t *buffPlay, int len) {
 
 void fetchAndPlayAudio() {
   if (WiFi.status() == WL_CONNECTED) {
+    // Connect to TTS server
     http.begin(http_get_tts);
     int httpResponseCode = http.GET();
 
@@ -64,7 +69,5 @@ void fetchAndPlayAudio() {
     Serial.println("Error in WiFi Connection");
     http.end();
   }
-
-  dac_output_voltage(DAC_CHANNEL_1, 0);
-
+  
 }

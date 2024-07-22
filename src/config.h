@@ -4,6 +4,9 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <driver/dac.h>
+#include "BluetoothSerial.h"
+#include <stdint.h>
+#include "HardwareSerial.h"
 
 // WiFi credential
 #define wifi_ssid "Hey hey"                         // Change to current actived WiFi
@@ -11,6 +14,7 @@
 
 // HTTP global variable
 extern HTTPClient http;
+extern BluetoothSerial SerialBT;
 #define http_post_server "http://192.168.161.107:5000/esp32/post_images"
 #define http_get_tts "http://192.168.161.107:5000/esp32/post_and_get_tts_voice"
 
@@ -20,7 +24,6 @@ extern HTTPClient http;
 #define soundSpeed                    0.034            // Sound speed in cm/μs
 #define range_minimum_camera_active   80               // Minimum distance in cm for camera being ON 
 
-// Camera app...
 // Camera Pins for ==[ ESP32 Wrover kit ]==
 #define PWDN_GPIO_NUM  -1
 #define RESET_GPIO_NUM -1
@@ -40,8 +43,8 @@ extern HTTPClient http;
 #define HREF_GPIO_NUM  23
 #define PCLK_GPIO_NUM  22
 
-// Speaker app...
-#define delay_sample 60         // 
-#define header_format_value 44
+// voice output app...
+#define delay_sample 60         // Set to 60 if sampling rate is 16kbps
+#define header_format_value 44  // Set to 44 if audio type is .mp3
 
 #endif
