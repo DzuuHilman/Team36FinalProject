@@ -2,7 +2,17 @@
 #include "config.h"
 
 int distance;
-char bt_name;
+
+// Check if Bluetooth is enable
+#if !defined(CONFIG_BT_SPP_ENABLED)
+#error Serial Port Profile for Bluetooth is not available or not enabled. It is only available for the ESP32 chip.
+#endif
+
+// Check Serial Port Profile
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
+
 
 void setup() {
   Serial.begin(115200);
@@ -59,8 +69,8 @@ void setup() {
   }
   // Check WiFi and Bluetooth connection (see [connection.cpp])
   checkWifiConnection();
-  bt_name = getBluetoothName();
-  checkBluetoothConnection(bt_name);
+  // bt_slave_name = getBluetoothName();
+  startBluetoothConnection();
 }
 
 void loop() {
@@ -79,6 +89,7 @@ void loop() {
       Serial.println("Camera capture failed");
       return;
     } else{
+      Serial.println("Attempting to POST image...");
       sendImageToServer(http_post_server, fb);
       esp_camera_fb_return(fb);
     }
@@ -88,10 +99,7 @@ void loop() {
   }
 
   // Check bluetooth is on
-  if (!SerialBT.connect()) {
-    Serial.println("Bluetooth disconnected, reconnecting...");
-    checkBluetoothConnection(bt_name);
-  }
+  attemptToConnectSlaveBluetooth();
   
   // Get .mp3 file from HTTP and send it to Bluetooth connection
   fetchAndPlayAudio();

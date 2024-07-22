@@ -12,6 +12,10 @@
 #define wifi_ssid "Hey hey"                         // Change to current actived WiFi
 #define wifi_pass "aingmaung"
 
+// Bluetooth
+#define bt_master_name "ESP32-Master-BT";      // ESP32 Bluetooth name
+#define bt_slave_name "soundcore R50i";        // Change this name to your Bluetooth device name
+
 // HTTP global variable
 extern HTTPClient http;
 extern BluetoothSerial SerialBT;

@@ -60,7 +60,7 @@ void fetchAndPlayAudio() {
       Serial.println("Finished playing TTS voice.");
     }
     else {
-    Serial.printf("Failed on HTTP GET. Error: %s\n", http.errorToString(httpResponseCode).c_str());
+    Serial.printf("Error to getting audio from TTS server. Error code: %s\n", http.errorToString(httpResponseCode).c_str());
     }
 
     http.end(); 

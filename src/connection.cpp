@@ -1,3 +1,4 @@
+#include "WString.h"
 #include <string>
 #include "HardwareSerial.h"
 #include "app.h"
@@ -5,6 +6,10 @@
 
 HTTPClient http;
 BluetoothSerial SerialBT;
+
+// For Bluetooth 
+bool connected;
+
 
 void checkWifiConnection(){
     WiFi.begin(wifi_ssid, wifi_pass);
@@ -16,24 +21,42 @@ void checkWifiConnection(){
     
     Serial.println("");
     Serial.println("WiFi connected!");
-    Serial.println("IP address: ");
+    Serial.print("IP address: ");
     Serial.println(WiFi.localIP().toString());
 }
-void checkBluetoothConnection(char bt_name){
-    SerialBT.begin(bt_name);
-    if(!SerialBT.begin(bt_name)){
+
+void startBluetoothConnection(){
+  String master = bt_master_name;
+    if(!SerialBT.begin(master, true)){
         Serial.println("Failed to connect Bluetooth");
         return;
     }
-    Serial.print(bt_name);
-    Serial.println(" suscsessfully connect!");
+    Serial.print(master);
+    Serial.println(" is started in bluetooth master mode.");
+}
+
+void attemptToConnectSlaveBluetooth(){
+  String slave = bt_slave_name;
+  connected = SerialBT.connect(slave);
+  
+  Serial.printf("Connecting to slave BT device named \"%s\"\n", slave.c_str());
+
+  // Check if connection is sucsees
+  if (connected) {
+    Serial.println("Connected sucsessfully!");
+  } else {
+    while (!SerialBT.connected(10000)) {
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+    }
+  }
 }
 
 char getBluetoothName(){
   // Waiting to start type in Serial Monitor
   char temp_bt_name;
-  Serial.println("Please input your Bluetooth device name: ");
-  while (Serial.available() == 0){
+
+  Serial.println("Please input your Bluetooth device number: ");
+  while (Serial.available() == 0) {
 
   }
   while (Serial.available() > 0) {
@@ -43,6 +66,7 @@ char getBluetoothName(){
   }
   return temp_bt_name;
 }
+
 void sendImageToServer(const char* serverURL, camera_fb_t* fb){
     if(!http.begin(serverURL)){
       Serial.println("Failed to connect to server. Try again in 5 seconds.");
@@ -55,7 +79,7 @@ void sendImageToServer(const char* serverURL, camera_fb_t* fb){
 
     if (httpResponseCode > 0) {
         String response = http.getString();
-        Serial.println("Response" + response);
+        Serial.println("Response " + response);
     } else {
         Serial.print("Error on HTTP request: ");
         Serial.println(httpResponseCode);

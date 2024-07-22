@@ -1,3 +1,4 @@
+#include "WString.h"
 #ifndef APP_H
 #define APP_H
 
@@ -13,8 +14,9 @@ float ultrasonic_get_distance();
 // From connection.cpp
 void checkWifiConnection();
 char getBluetoothName();
-void checkBluetoothConnection(char bt_name);
+void startBluetoothConnection();
 void sendImageToServer(const char* serverURL, camera_fb_t* fb);
+void attemptToConnectSlaveBluetooth();
 
 // From voice_output.cpp
 void playMp3File(uint8_t *buffPlay, int len);
