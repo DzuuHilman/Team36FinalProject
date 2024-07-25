@@ -1,7 +1,7 @@
 #include "app.h"
 #include "config.h"
 
-int distance;
+int distance = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -79,5 +79,5 @@ void loop() {
     Serial.println("No object detected");
   }
 
-  delay(1000);
+  delay(100);
 }

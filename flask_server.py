@@ -52,7 +52,7 @@ def upload_file():
     if len(labels) == 0:
         return jsonify({'message': 'No objects detected'}), 200
     else:
-        return jsonify({'message': 'Objects detected', 'labels': labels}), 200 
+        return jsonify({'labels': labels}), 200 
 
     # return jsonify({'message': 'File uploaded successfully'}), 200
 
