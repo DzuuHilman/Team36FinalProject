@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_file
+from pydub import AudioSegment
 import os
 import time
 from gtts import gTTS
@@ -15,6 +16,13 @@ os.makedirs(tts_folders, exist_ok=True)
 
 model = YOLO('yolov8s.pt')
 labels = []
+
+def converter_mp3_to_raw(mp3_filepath, raw_file_destination):
+    sound = AudioSegment.from_mp3(mp3_filepath)
+    data = sound._data
+    with open(raw_file_destination, 'wb') as f:
+        f.write(data)
+    return data
 @app.route('/')
 def landing_page():
     return "This is landing page"
@@ -65,33 +73,55 @@ def get_files():
     return jsonify({'files': files, 'labels': labels}), 200
 
 
-@app.route('/esp32/delete_images', methods=['DELETE'])
-def delete_files():
-    files = os.listdir(frames_folder)
-    for file in files:
-        filepath = os.path.join(up, file)
-        file_time = os.path.getmtime(filepath)
-        if time.time() - file_time > 600: # 10 minutes in seconds
-            os.remove(filepath)
-    return jsonify({'message': 'Files deleted successfully'}), 200
-
-
 @app.route('/esp32/post_and_get_tts_voice', methods=['GET'])
 def post_and_get_tts_voice():
     global labels
-    if not labels:
-        return jsonify({'error': 'No object detected'}), 200
-
+    # if not labels:
+    #     return jsonify({'error': 'No object detected'}), 200
+    labels.append('person')
     object_name = labels[0]
 
     voiceCall = "Careful! There is a " + object_name + "in front of you!"
     tts = gTTS(text=voiceCall, lang='en')
 
-    filename = 'tts.mp3'  # You can generate a unique name if needed
-    filepath = os.path.join(tts_folders, filename)
-    
+    # Generate file name
+    filename            ='tts.mp3'
+    filepath            = os.path.join(tts_folders, filename)
+    raw_filename        ='tts.raw'
+    raw_filepath        = os.path.join(tts_folders, raw_filename)
+    c_filename          ='tts.c'
+    c_filepath          = os.path.join(tts_folders, c_filename)
+
     tts.save(filepath)
-    return send_file('tts/tts.mp3', mimetype='audio/mpeg'), 200
+
+    # convert mp3 to raw
+    data = converter_mp3_to_raw(filepath, raw_filepath)
+
+    # Check if convertion is sucsess
+    if not os.path.exists(raw_filepath):
+        return jsonify({'error': 'Failed to convert .mp3 to RAW'}), 500
+    
+    # raw to c file conversion and send c file
+    with open(c_filepath, 'w') as f:
+        f.write('const uint8_t tts_data[] = {')
+
+        # Iterate through the data, converting each byte to hexadecimal
+        for i in range(len(data)):
+            # Write each byte in hexadecimal, no spaces or newlines
+            f.write(f'{data[i]:02X},')
+
+        f.write('};\n')
+    
+    # Check if the convertion is sucsess
+    if not os.path.exists(c_filepath):
+        return jsonify({'error': 'Failed to convert RAW to c file'}), 500
+    
+    # Send the c file
+    return send_file(c_filepath, mimetype='text/plain'), 200
+    
+    # Send the raw data as a file
+    # return send_file(filepath, mimetype='audio/mpeg'), 200
+    return jsonify({"Data": c_filepath}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=5000)

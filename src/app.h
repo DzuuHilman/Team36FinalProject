@@ -13,13 +13,11 @@ float ultrasonic_get_distance();
 
 // From connection.cpp
 void checkWifiConnection();
-char getBluetoothName();
-void startBluetoothConnection();
+int checkEspMemory();
 void sendImageToServer(const char* serverURL, camera_fb_t* fb);
-void attemptToConnectSlaveBluetooth();
 
 // From voice_output.cpp
-void playMp3File(uint8_t *buffPlay, int len);
+void playMp3File(uint8_t *buffPlay, int32_t len);
 void fetchAndPlayAudio();
 
 #endif

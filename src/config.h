@@ -4,23 +4,23 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <driver/dac.h>
-#include "BluetoothSerial.h"
 #include <stdint.h>
 #include "HardwareSerial.h"
+#include "BluetoothA2DPSource.h"
 
 // WiFi credential
 #define wifi_ssid "Hey hey"                         // Change to current actived WiFi
 #define wifi_pass "aingmaung"
 
 // Bluetooth
-#define bt_master_name "ESP32-Master-BT";      // ESP32 Bluetooth name
-#define bt_slave_name "soundcore R50i";        // Change this name to your Bluetooth device name
+#define bt_master_name "ESP32-Master-BT"      // ESP32 Bluetooth name
+#define bt_slave_name "soundcore R50i"        // Change this name to your Bluetooth device name
+extern BluetoothA2DPSource a2dp_source;
 
-// HTTP global variable
+// HTTP and Bglobal variable
 extern HTTPClient http;
-extern BluetoothSerial SerialBT;
-#define http_post_server "http://192.168.161.107:5000/esp32/post_images"
-#define http_get_tts "http://192.168.161.107:5000/esp32/post_and_get_tts_voice"
+#define http_post_server "http://192.168.161.108:5000/esp32/post_images"
+#define http_get_tts "http://192.168.161.108:5000/esp32/post_and_get_tts_voice"
 
 // Ultrasonic app
 #define trigPin                       12

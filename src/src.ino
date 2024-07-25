@@ -1,7 +1,7 @@
 #include "app.h"
 #include "config.h"
 
-int distance;
+int distance = 0;
 
 // Check if Bluetooth is enable
 #if !defined(CONFIG_BT_SPP_ENABLED)
@@ -12,6 +12,9 @@ int distance;
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
+
+// For Bluetooth 
+bool connected;
 
 
 void setup() {
@@ -69,15 +72,22 @@ void setup() {
   }
   // Check WiFi and Bluetooth connection (see [connection.cpp])
   checkWifiConnection();
-  // bt_slave_name = getBluetoothName();
-  startBluetoothConnection();
+  a2dp_source.start(bt_master_name, 0);
 }
 
 void loop() {
+  // Check Bluetooth connection
+  if (!a2dp_source.is_connected()) {
+    Serial.println("Bluetooth is not connected...");
+    a2dp_source.start(bt_master_name);
+    return;
+  }
+
   // Check WiFi is on
   if (!WiFi.isConnected()) {
     Serial.println("WiFi disconnected, reconnecting...");
     checkWifiConnection();
+    return;
   }
 
   // Check if object is present in minimum range
@@ -88,21 +98,24 @@ void loop() {
     if (!fb) {
       Serial.println("Camera capture failed");
       return;
-    } else{
-      Serial.println("Attempting to POST image...");
-      sendImageToServer(http_post_server, fb);
-      esp_camera_fb_return(fb);
     }
+    
+    // Check available ESP memory
+    int memory = checkEspMemory();
+    Serial.printf("ESP Memory available: %i\n", memory); 
+    // POST Image to server
+    Serial.println("Image sucsessfully captured! Attempting to POST image...");
+    sendImageToServer(http_post_server, fb);
+    esp_camera_fb_return(fb);
+
+
+    // Send TTS Voice to ESP
+    // fetchAndPlayAudio();     
+  
     
   } else {
     Serial.println("No object detected");
   }
-
-  // Check bluetooth is on
-  attemptToConnectSlaveBluetooth();
   
-  // Get .mp3 file from HTTP and send it to Bluetooth connection
-  fetchAndPlayAudio();
-
-  delay(500);
+  delay(1000);
 }

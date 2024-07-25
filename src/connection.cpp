@@ -1,3 +1,5 @@
+#include "Esp.h"
+#include "WiFi.h"
 #include "WString.h"
 #include <string>
 #include "HardwareSerial.h"
@@ -5,50 +7,20 @@
 #include "config.h"
 
 HTTPClient http;
-BluetoothSerial SerialBT;
-
-// For Bluetooth 
-bool connected;
-
 
 void checkWifiConnection(){
-    WiFi.begin(wifi_ssid, wifi_pass);
 
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    
-    Serial.println("");
-    Serial.println("WiFi connected!");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP().toString());
-}
+  WiFi.begin(wifi_ssid, wifi_pass);
 
-void startBluetoothConnection(){
-  String master = bt_master_name;
-    if(!SerialBT.begin(master, true)){
-        Serial.println("Failed to connect Bluetooth");
-        return;
-    }
-    Serial.print(master);
-    Serial.println(" is started in bluetooth master mode.");
-}
-
-void attemptToConnectSlaveBluetooth(){
-  String slave = bt_slave_name;
-  connected = SerialBT.connect(slave);
-  
-  Serial.printf("Connecting to slave BT device named \"%s\"\n", slave.c_str());
-
-  // Check if connection is sucsees
-  if (connected) {
-    Serial.println("Connected sucsessfully!");
-  } else {
-    while (!SerialBT.connected(10000)) {
-      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
-    }
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
   }
+  
+  Serial.println("");
+  Serial.println("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP().toString());
 }
 
 char getBluetoothName(){
@@ -67,6 +39,10 @@ char getBluetoothName(){
   return temp_bt_name;
 }
 
+int checkEspMemory(){
+  int memory = ESP.getFreeHeap();
+  return memory;
+} 
 void sendImageToServer(const char* serverURL, camera_fb_t* fb){
     if(!http.begin(serverURL)){
       Serial.println("Failed to connect to server. Try again in 5 seconds.");
@@ -81,8 +57,9 @@ void sendImageToServer(const char* serverURL, camera_fb_t* fb){
         String response = http.getString();
         Serial.println("Response " + response);
     } else {
-        Serial.print("Error on HTTP request: ");
-        Serial.println(httpResponseCode);
+        Serial.print("Error on sending image to server: ");
+        Serial.printf("%s (", http.errorToString(httpResponseCode).c_str());
+        Serial.printf("%i) \n", httpResponseCode);
     }
 
     http.end();
