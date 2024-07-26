@@ -1,13 +1,14 @@
 import streamlit as st
 import os
 import time
-from pydub import AudioSegment
-from pydub.playback import play
+import base64
+import cv2
+import supervision as sv
+from ultralytics import YOLO
 
-# Fungsi untuk memutar file MP3
-def play_mp3(mp3_file):
-    audio = AudioSegment.from_file(mp3_file)
-    play(audio)
+# Load model
+model = YOLO("yolov8s.pt")
+bboxannotator = sv.BoxAnnotator()
 
 # Fungsi untuk memantau perubahan file
 def watch_file(file_path):
@@ -19,38 +20,77 @@ def watch_file(file_path):
             last_modified_time = current_modified_time
             yield True  # Kembali True jika file diperbarui
         else:
-            yield True  # Kembali False jika tidak ada perubahan
+            yield False  # Kembali False jika tidak ada perubahan
+
+# Fungsi untuk memproses gambar dan menampilkan hasil deteksi objek
+def process_and_display_image(image_path):
+    image = cv2.imread(image_path)
+    result = model(image)[0]
+    detections = sv.Detections.from_ultralytics(result)
+    detections = detections[detections.confidence > 0.5]
+    labels = [
+        f"{result.names[class_id]} ({confidence:.2f})"
+        for class_id, confidence in zip(detections.class_id, detections.confidence)
+    ]
+    annotated_image = bboxannotator.annotate(scene=image, detections=detections, labels=labels)
+    annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+    
+    # Menampilkan gambar dan label di Streamlit
+    st.image(annotated_image, caption='Gambar', use_column_width=True)
+    if detections.class_id.size > 0:
+        st.write('Objek yang terdeteksi pada gambar: ' + ', '.join(labels))
+    else:
+        st.write('Tidak ada objek yang terdeteksi dengan keyakinan lebih dari 0.5.')
+
+# Fungsi untuk autoplay file audio
+def autoplay_audio(file_path: str):
+    with open(file_path, "rb") as f:
+        data = f.read()
+        b64 = base64.b64encode(data).decode()
+        md = f"""
+            <audio controls autoplay>
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+            </audio>
+            """
+        st.markdown(
+            md,
+            unsafe_allow_html=True,
+        )
 
 # Streamlit interface
-st.title("MP3 Player")
+st.title("MP3 Player dan Deteksi Objek")
 
 # Path ke file MP3
 tts_folder = 'tts'
 filename = "tts.mp3"
 file_path = os.path.join(tts_folder, filename)
 
+# Path gambar
+frame_folder = 'frames'
+frame_filename = "frame.jpg"
+image_file_path = os.path.join(frame_folder, frame_filename)
+
 # Menampilkan status
 status_message = st.empty()
 
-# Path ke file MP3 dan gambar
-image_file_path = "frames/frame.jpg"  # Ganti dengan path file gambar Anda
-
-# Menampilkan status
-status_message = st.empty()
-
-# Mulai pemantauan file
-with st.spinner('Memulai pemantauan file MP3...'):
-    watcher = watch_file(file_path)
-    for change_detected in watcher:
-        if change_detected:
-            status_message.text("File MP3 diperbarui, memutar ulang...")
-            try:
-                # Menampilkan gambar
-                if os.path.exists(image_file_path):
-                    st.image(image_file_path, caption='Gambar', use_column_width=True)
-                else:
-                    st.error("Gambar tidak ditemukan!")
-                st.audio(file_path, format='audio/mp3', autoplay=True)
-                status_message.text("File MP3 selesai diputar.")
-            except Exception as e:
-                status_message.error(f"Gagal memutar file MP3: {e}")
+# Tombol untuk memulai pemantauan file
+if st.button("Mulai Pemantauan"):
+    with st.spinner('Memulai pemantauan file MP3...'):
+        watcher = watch_file(file_path)
+        for change_detected in watcher:
+            if change_detected:
+                status_message.text("File MP3 diperbarui, memutar ulang...")
+                try:
+                    # Menampilkan gambar dan hasil deteksi
+                    if os.path.exists(image_file_path):
+                        process_and_display_image(image_file_path)
+                    else:
+                        st.error("Gambar tidak ditemukan!")
+                    
+                    # Memutar file MP3
+                    autoplay_audio(file_path)
+                    status_message.text("File MP3 selesai diputar.")
+                except Exception as e:
+                    status_message.error(f"Gagal memutar file MP3: {e}")
+            else:
+                status_message.text("Tidak ada perubahan pada file MP3.")
