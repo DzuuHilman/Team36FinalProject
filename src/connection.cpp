@@ -1,4 +1,4 @@
-#include "WString.h"
+// #include "WString.h"
 #include "app.h"
 #include "config.h"
 
@@ -20,6 +20,7 @@ void checkWifiConnection(){
 }
 
 void sendImageToServer(const char* serverURL, camera_fb_t* fb){
+    http.setConnectTimeout(10000);
     if(!http.begin(serverURL)){
       Serial.println("Failed to connect to server. Try again in 5 seconds.");
       return;
