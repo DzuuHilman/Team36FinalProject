@@ -14,7 +14,7 @@ tts_folders = 'tts'
 os.makedirs(tts_folders, exist_ok=True)
 
 model = YOLO('yolov8s.pt')
-labels = []
+labels = ["person"]
 @app.route('/')
 def landing_page():
     return "This is landing page"
@@ -52,7 +52,7 @@ def upload_file():
     if len(labels) == 0:
         return jsonify({'message': 'No objects detected'}), 200
     else:
-        return jsonify({'message': 'Objects detected', 'labels': labels}), 200 
+        return jsonify({'labels': labels}), 200 
 
     # return jsonify({'message': 'File uploaded successfully'}), 200
 
@@ -63,18 +63,6 @@ def get_files():
     global labels
     print(labels)
     return jsonify({'files': files, 'labels': labels}), 200
-
-
-@app.route('/esp32/delete_images', methods=['DELETE'])
-def delete_files():
-    files = os.listdir(frames_folder)
-    for file in files:
-        filepath = os.path.join(up, file)
-        file_time = os.path.getmtime(filepath)
-        if time.time() - file_time > 600: # 10 minutes in seconds
-            os.remove(filepath)
-    return jsonify({'message': 'Files deleted successfully'}), 200
-
 
 @app.route('/esp32/post_and_get_tts_voice', methods=['GET'])
 def post_and_get_tts_voice():

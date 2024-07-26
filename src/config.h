@@ -3,7 +3,7 @@
 
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <driver/dac.h>
+// #include <driver/dac.h>
 
 // WiFi credential
 #define wifi_ssid "Hey hey"                         // Change to current actived WiFi
@@ -12,6 +12,7 @@
 // HTTP global variable
 extern HTTPClient http;
 #define http_post_server "http://192.168.161.107:5000/esp32/post_images"
+// #define http_get_tts "http://192.168.161.107:5000/esp32/post_and_get_tts_voice"
 
 // Ultrasonic app
 #define trigPin                       12
@@ -40,5 +41,7 @@ extern HTTPClient http;
 #define PCLK_GPIO_NUM  22
 
 // Speaker app...
-#define delay_sample 60         // 
+// #define delay_sample 60         // 
+// #define header_format_value 44
+
 #endif

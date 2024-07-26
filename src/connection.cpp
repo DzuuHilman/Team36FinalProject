@@ -1,4 +1,4 @@
-#include "WString.h"
+// #include "WString.h"
 #include "app.h"
 #include "config.h"
 
@@ -15,11 +15,12 @@ void checkWifiConnection(){
 
     Serial.println("");
     Serial.println("WiFi connected!");
-    Serial.println("IP address: ");
+    Serial.print("IP address: ");
     Serial.println(WiFi.localIP().toString());
 }
 
 void sendImageToServer(const char* serverURL, camera_fb_t* fb){
+    http.setConnectTimeout(10000);
     if(!http.begin(serverURL)){
       Serial.println("Failed to connect to server. Try again in 5 seconds.");
       return;
@@ -31,11 +32,13 @@ void sendImageToServer(const char* serverURL, camera_fb_t* fb){
 
     if (httpResponseCode > 0) {
         String response = http.getString();
-        Serial.println("Response" + response);
+        Serial.println("Response " + response);
     } else {
         Serial.print("Error on HTTP request: ");
-        Serial.println(httpResponseCode);
+        Serial.print(http.errorToString(httpResponseCode).c_str());
+        Serial.printf(" (%i) \n", httpResponseCode);
     }
 
     http.end();
+    delay(10);
 }
