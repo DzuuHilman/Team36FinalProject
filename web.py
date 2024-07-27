@@ -13,13 +13,13 @@ def play_mp3(mp3_file):
 def watch_file(file_path):
     last_modified_time = os.path.getmtime(file_path)
     while True:
-        time.sleep(5)  # Tunggu 5 detik sebelum memeriksa lagi
+        time.sleep(8)  # Tunggu 5 detik sebelum memeriksa lagi
         current_modified_time = os.path.getmtime(file_path)
         if current_modified_time != last_modified_time:
             last_modified_time = current_modified_time
             yield True  # Kembali True jika file diperbarui
         else:
-            yield True  # Kembali False jika tidak ada perubahan
+            yield False  # Kembali False jika tidak ada perubahan
 
 # Streamlit interface
 st.title("MP3 Player")

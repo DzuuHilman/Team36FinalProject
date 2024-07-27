@@ -15,6 +15,23 @@ os.makedirs(tts_folders, exist_ok=True)
 
 model = YOLO('yolov8s.pt')
 labels = ["person"]
+
+# Function to get TTS audio
+def get_tts_voice():
+    global labels
+    if not labels:
+        return jsonify({'error': 'No object detected'}), 200
+
+    object_name = labels[0]
+
+    voiceCall = "Careful! There is a " + object_name + "in front of you!"
+    tts = gTTS(text=voiceCall, lang='en')
+
+    filename = 'tts.mp3'  # You can generate a unique name if needed
+    filepath = os.path.join(tts_folders, filename)
+    
+    tts.save(filepath)
+
 @app.route('/')
 def landing_page():
     return "This is landing page"
@@ -52,7 +69,8 @@ def upload_file():
     if len(labels) == 0:
         return jsonify({'message': 'No objects detected'}), 200
     else:
-        return jsonify({'labels': labels}), 200 
+        get_tts_voice()
+        return jsonify({'labels': labels, 'Message': "Sucsess creating TTS audio! "}), 200 
 
     # return jsonify({'message': 'File uploaded successfully'}), 200
 
