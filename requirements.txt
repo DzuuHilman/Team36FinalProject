@@ -1,0 +1,6 @@
+Flask
+gTTS
+supervision
+ultralytics
+opencv-python
+streamlit

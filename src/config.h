@@ -12,7 +12,6 @@
 // HTTP global variable
 extern HTTPClient http;
 #define http_post_server "http://192.168.161.107:5000/esp32/post_images"
-// #define http_get_tts "http://192.168.161.107:5000/esp32/post_and_get_tts_voice"
 
 // Ultrasonic app
 #define trigPin                       12
@@ -39,9 +38,5 @@ extern HTTPClient http;
 #define VSYNC_GPIO_NUM 25
 #define HREF_GPIO_NUM  23
 #define PCLK_GPIO_NUM  22
-
-// Speaker app...
-// #define delay_sample 60         // 
-// #define header_format_value 44
 
 #endif

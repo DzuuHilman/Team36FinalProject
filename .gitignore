@@ -11,6 +11,9 @@
 *.gch
 *.pch
 
+# VS Code settings for verivy and upload code to ESP
+.vscode
+
 # Compiled Dynamic libraries
 *.so
 *.dylib

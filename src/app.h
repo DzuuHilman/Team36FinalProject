@@ -4,7 +4,6 @@
 #include <WiFi.h>
 #include <esp_camera.h>
 #include <HTTPClient.h>
-#include "HardwareSerial.h"
 #include <stdint.h>
 
 
