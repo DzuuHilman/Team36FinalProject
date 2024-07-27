@@ -1,5 +1,6 @@
 # Smart Glasses - Team 36
-![Product photo](images\product_photo.jpg)
+<img src = images\product_photo.jpg width = auto>
+
 Samsung Innovation Campus AI development Bootcamp (May - Aug 2024) 
 
 This project aims to develop IoT-based smart glasses for the blind using the ESP32 microcontroller. These glasses are equipped with a camera, proximity sensor, speaker and AI technology. The glasses will collect images from the surrounding environment, then AI will detect any objects in the surrounding environment, and provide sound for any objects in the surrounding environment to provide information to the blind who wear glasses.
