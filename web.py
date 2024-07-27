@@ -20,7 +20,7 @@ def watch_file(file_path):
             last_modified_time = current_modified_time
             yield True  # Kembali True jika file diperbarui
         else:
-            yield True  # Kembali False jika tidak ada perubahan
+            yield False  # Kembali False jika tidak ada perubahan
 
 # # Fungsi untuk memproses gambar dan menampilkan hasil deteksi objek
 # def process_and_display_image(image_path):
@@ -43,7 +43,7 @@ def watch_file(file_path):
 #         st.write('Tidak ada objek yang terdeteksi dengan keyakinan lebih dari 0.5.')
 
 # Fungsi untuk autoplay file audio
-def autoplay_audio(file_path: str):
+def autoplay_audio(file_path: str, audio_placeholder):
     with open(file_path, "rb") as f:
         data = f.read()
         b64 = base64.b64encode(data).decode()
@@ -52,7 +52,8 @@ def autoplay_audio(file_path: str):
             <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
             </audio>
             """
-        st.markdown(
+        audio_placeholder.empty()
+        audio_placeholder.markdown(
             md,
             unsafe_allow_html=True,
         )
@@ -72,6 +73,21 @@ image_file_path = os.path.join(frame_folder, frame_filename)
 
 # Menampilkan status
 status_message = st.empty()
+image_placeholder = st.empty()
+audio_placeholder = st.empty()
+
+
+# Inject custom CSS
+st.markdown(
+    """
+    <style>
+    .main {
+        min-height: 100vh;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # Tombol untuk memulai pemantauan file
 if st.button("Mulai Pemantauan"):
@@ -86,12 +102,12 @@ if st.button("Mulai Pemantauan"):
                         # process_and_display_image(image_file_path)
                         # display_image(image_file_path)
                         image = cv2.imread(image_file_path)
-                        st.image(image, caption='Gambar', use_column_width=True)
+                        image_placeholder.image(image, caption='Gambar', use_column_width=True)
                     else:
-                        st.error("Gambar tidak ditemukan!")
+                        image_placeholder.error("Gambar tidak ditemukan!")
                     
                     # Memutar file MP3
-                    autoplay_audio(file_path)
+                    autoplay_audio(file_path, audio_placeholder)
                     status_message.text("File MP3 selesai diputar.")
                 except Exception as e:
                     status_message.error(f"Gagal memutar file MP3: {e}")
