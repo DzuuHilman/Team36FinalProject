@@ -4,6 +4,7 @@ import time
 from gtts import gTTS
 import supervision as sv
 from ultralytics import YOLO
+import cv2
 
 app = Flask(__name__)
 
@@ -14,6 +15,7 @@ tts_folders = 'tts'
 os.makedirs(tts_folders, exist_ok=True)
 
 model = YOLO('yolov8s.pt')
+bboxannotator = sv.BoxAnnotator()
 labels = ["person"]
 
 # Function to get TTS audio
@@ -64,6 +66,14 @@ def upload_file():
         f"{result.names[class_id]}"
         for class_id, confidence in zip(detections.class_id, detections.confidence)
     ]
+    annotated_image = sv.bboxannotator.annotate(scene=filepath, detections=detections, labels=labels)
+    annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+    
+    # Save the annotated image
+    filename = 'annotated_frame.jpg'  # You can generate a unique name if needed
+    filepath = os.path.join(frames_folder, filename)
+    with open(filepath, 'wb') as f:
+        f.write(cv2.imencode('.jpg', annotated_image)[1].tobytes())    
 
     print(labels)
     if len(labels) == 0:
