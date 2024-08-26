@@ -5,6 +5,7 @@ from gtts import gTTS
 import supervision as sv
 from ultralytics import YOLO
 import cv2
+from scipy.ndimage import rotate
 
 app = Flask(__name__)
 
@@ -58,7 +59,8 @@ def upload_file():
         f.write(image_data)
     image = cv2.imread(filepath)
 
-
+    # rotate image 180 degree 
+    image = rotate(image, 180)
     # Perform object detection
     result = model(image)[0]
     detections = sv.Detections.from_ultralytics(result)
@@ -70,7 +72,7 @@ def upload_file():
     ]
     boxannotator= sv.BoxAnnotator()
     annotated_image = boxannotator.annotate(scene=image, detections=detections)
-    annotated_image = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+
     
     # Save the annotated image
     filename = 'annotated_frame.jpg'  # You can generate a unique name if needed

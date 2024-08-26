@@ -11,11 +11,8 @@
 void ultrasonic_setup();
 float ultrasonic_get_distance();
 
-// From camera.cpp 
-
 // From connection.cpp
 void checkWifiConnection();
-void checkMqttConnection();
 void sendImageToServer(const char* serverURL, camera_fb_t* fb);
 
 #endif

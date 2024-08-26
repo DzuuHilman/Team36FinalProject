@@ -2,7 +2,6 @@ import streamlit as st
 import os
 import time
 import base64
-import cv2
 import supervision as sv
 from ultralytics import YOLO
 
@@ -81,7 +80,8 @@ if st.button("Mulai Pemantauan"):
                     if os.path.exists(image_file_path):
                         # process_and_display_image(image_file_path)
                         # display_image(image_file_path)
-                        image = cv2.imread(image_file_path)
+                        with open(image_file_path, "rb") as f:
+                            image = f.read()
                         image_placeholder.image(image, caption='Gambar', use_column_width=True)
                     else:
                         image_placeholder.error("Gambar tidak ditemukan!")
