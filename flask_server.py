@@ -6,6 +6,7 @@ import supervision as sv
 from ultralytics import YOLO
 import cv2
 from scipy.ndimage import rotate
+import numpy as np
 
 app = Flask(__name__)
 
@@ -61,6 +62,51 @@ def upload_file():
 
     # rotate image 180 degree 
     image = rotate(image, 180)
+
+    # # Pre process image
+    # # Resize the image using interpolation
+    # scale_percent = 200  # Percent of original size
+    # width = int(image.shape[1] * scale_percent / 100)
+    # height = int(image.shape[0] * scale_percent / 100)
+    # dim = (width, height)
+    # resized_image = cv2.resize(image, dim, interpolation=cv2.INTER_LINEAR)
+
+    # # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    # r, g, b = cv2.split(resized_image)
+    # r_clahe = clahe.apply(r)
+    # g_clahe = clahe.apply(g)
+    # b_clahe = clahe.apply(b)
+    # equalized = cv2.merge((r_clahe, g_clahe, b_clahe))
+
+    # # Apply Gamma Correction
+    # gamma = 1.2
+    # gamma_corrected = np.array(255*(equalized / 255) ** gamma, dtype='uint8')
+
+    # # Apply Brightness and Contrast adjustment with reduced intensity
+    # alpha = 1.1  # Reduced contrast control (1.0-3.0)
+    # beta = 10    # Reduced brightness control (0-100)
+    # adjusted = cv2.convertScaleAbs(gamma_corrected, alpha=alpha, beta=beta)
+
+    # # Apply Edge Enhancement with reduced kernel intensity
+    # kernel_edge = np.array([[-0.5, -0.5, -0.5], 
+    #                         [-0.5,  5,   -0.5], 
+    #                         [-0.5, -0.5, -0.5]])
+    # enhanced = cv2.filter2D(adjusted, -1, kernel_edge)
+
+    # # Apply Gaussian Blurring to reduce noise
+    # blurred = cv2.GaussianBlur(enhanced, (3, 3), 0)
+
+    # # Final sharpening (if needed)
+    # kernel_sharpen = np.array([[0, -0.3, 0], 
+    #                         [-0.3, 2, -0.3], 
+    #                         [0, -0.3, 0]])
+    # sharpened = cv2.filter2D(blurred, -1, kernel_sharpen)
+
+    # # Resize back to original size
+    # final_image = cv2.resize(sharpened, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_LINEAR)
+    # image = final_image
+
     # Perform object detection
     result = model(image)[0]
     detections = sv.Detections.from_ultralytics(result)
@@ -72,7 +118,6 @@ def upload_file():
     ]
     boxannotator= sv.BoxAnnotator()
     annotated_image = boxannotator.annotate(scene=image, detections=detections)
-
     
     # Save the annotated image
     filename = 'annotated_frame.jpg'  # You can generate a unique name if needed
